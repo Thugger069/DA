@@ -285,6 +285,7 @@ menu() {
   $(ColorGreen '38)') Fix Start DirectAdmin
   $(ColorGreen '39)') Reboot VPS
 
+    +++ ULTILITIES +++
   $(ColorGreen '40)') Speed Test VPS
   $(ColorGreen '41)') Speed Test VPS + Share
   $(ColorGreen '42)') Clean DirectAdmin
