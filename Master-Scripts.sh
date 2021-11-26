@@ -193,7 +193,22 @@ function install_da_nopre() {
 function active_da_openvz() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/Finaly-All-In-One-DirectAdmin/main/active-da-openvz.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/Finaly-All-In-One-DirectAdmin/main/active-da-openvz.sh)
 }
-
+function change_pass_centos() {
+    passwd
+}
+function change_hostname() {
+    vi /etc/hostname
+    hostnamectl
+}
+function speed_test() {
+    curl -Lso- tocdo.net | bash
+}
+function speed_test_share() {
+    curl -Lso- tocdo.net/share | bash
+}
+function pause(){
+   read -p "$*"
+}
 ##
 # Color  Variables
 ##
@@ -218,53 +233,67 @@ menu() {
                  ========================
 
     +++ SYSTEM  +++
-  $(ColorGreen '1)') Thông tin Bộ nhớ VPS
-  $(ColorGreen '2)') Thông tin CPU - Cấu hình VPS
+  $(ColorGreen '01)') Thông tin Bộ nhớ VPS
+  $(ColorGreen '02)') Thông tin CPU - Cấu hình VPS
 
     +++ INSTALL +++
-  $(ColorGreen '3)') Cài đặt DirectAdmin Mặc định
-  $(ColorGreen '4)') Cài đặt DirectAdmin Tuỳ biến 
-  $(ColorGreen '5)') Cài đặt OpenLiteSpeed
-  $(ColorGreen '6)') Cài đặt MariaDB
-  $(ColorGreen '7)') Cài đặt Memcached
-  $(ColorGreen '8)') Cài đặt Redis
-  $(ColorGreen '9)') Cài đặt FireWall
-  $(ColorGreen '10)') Cài đặt Rclone
-
+  $(ColorGreen '03)') Cài đặt DirectAdmin Type 1
+  $(ColorGreen '04)') Cài đặt DirectAdmin Type 2
+  $(ColorGreen '05)') Cài đặt DirectAdmin Type No-Pre-config
+  $(ColorGreen '06)') Cài đặt DirectAdmin Auto System
+  $(ColorGreen '07)') Cài đặt OpenLiteSpeed
+  $(ColorGreen '08)') Cài đặt MariaDB
+  $(ColorGreen '09)') Cài đặt Memcached
+  $(ColorGreen '10)') Cài đặt Redis
+  $(ColorGreen '11)') Cài đặt FireWall
+  $(ColorGreen '12)') Cài đặt Rclone
+  
     +++ ACTIVE +++
-  $(ColorGreen '11)') Active DirectAdmin
+  $(ColorGreen '13)') Active DirectAdmin
+  $(ColorGreen '14)') Active Direct Admin Type 2
+  $(ColorGreen '15)') Active Direct Admin OpenVZ
 
-    +++ ADVANCED CONFIG +++
-  $(ColorGreen '12)') Config PhpMyAdmin
-  $(ColorGreen '13)') Config OPcache
-  $(ColorGreen '14)') Config Mecached
-  $(ColorGreen '15)') Config Redis
-  $(ColorGreen '16)') Config OpenLiteSpeed
+    +++ CONFIG +++
+  $(ColorGreen '16)') Config Auto System
   $(ColorGreen '17)') Config DirectAdmin
-  $(ColorGreen '18)') Config Auto System
-  $(ColorGreen '19)') Config PHP 5.6
-  $(ColorGreen '20)') Config PHP 7.3
-  $(ColorGreen '21)') Config PHP 7.4
-  $(ColorGreen '22)') Config PHP 8.0
+  $(ColorGreen '18)') Config PhpMyAdmin
+  $(ColorGreen '19)') Config OPcache
+  $(ColorGreen '20)') Config Mecached
+  $(ColorGreen '21)') Config Redis
+  $(ColorGreen '22)') Config OpenLiteSpeed
+  $(ColorGreen '23)') Config PHP 5.6
+  $(ColorGreen '24)') Config PHP 7.3
+  $(ColorGreen '25)') Config PHP 7.4
+  $(ColorGreen '26)') Config PHP 8.0
 
-    +++ ULTILITIES +++
-  $(ColorGreen '23)') Restart OpenLiteSpeed
-  $(ColorGreen '24)') Change Port DirectAdmin
-  $(ColorGreen '25)') Change Port SSH
-  $(ColorGreen '26)') Fix Start DirectAdmin
-  $(ColorGreen '27)') Clean Auto System
-  $(ColorGreen '28)') Clean DirectAdmin
-  $(ColorGreen '29)') Reboot VPS
-  $(ColorGreen '30)') Restart DirectAdmin
-  $(ColorGreen '31)') Get DA_Admin SQL Pass
-  $(ColorGreen '32)') Get User Admin Pass
-  $(ColorGreen '33)') Change Pass DA
-  $(ColorGreen '34)') Change Pass Root
+    +++ GET +++
+  $(ColorGreen '27)') Get DA_Admin SQL Pass
+  $(ColorGreen '28)') Get User DirectAdmin Pass
+
+    +++ CHANGE +++
+  $(ColorGreen '29)') Change Hostname VPS
+  $(ColorGreen '30)') Change Port DirectAdmin
+  $(ColorGreen '31)') Change Port SSH VPS
+  $(ColorGreen '32)') Change Pass CentOS VPS
+  $(ColorGreen '33)') Change Pass Admin DirectAdmin
+  $(ColorGreen '34)') Change Pass Root VPS
   $(ColorGreen '35)') Rename Auto System
-  $(ColorGreen '36)') Active Direct Admin
-  $(ColorGreen '37)') Active Direct Admin OpenVZ
-  $(ColorGreen '38)') Install Only
-  $(ColorGreen '39)') Install No Pre-Config
+
+    +++ RESTART +++
+  $(ColorGreen '36)') Restart OpenLiteSpeed
+  $(ColorGreen '37)') Restart DirectAdmin
+  $(ColorGreen '38)') Fix Start DirectAdmin
+  $(ColorGreen '39)') Reboot VPS
+
+  $(ColorGreen '40)') Speed Test VPS
+  $(ColorGreen '41)') Speed Test VPS + Share
+  $(ColorGreen '42)') Clean DirectAdmin
+  $(ColorGreen '43)') Clean Auto System
+
+
+
+
+
 
   $(ColorGreen '0)') Exit
 
@@ -275,158 +304,217 @@ $(ColorBlue 'Chọn tuỳ chọn của bạn (Nhập số và nhấn Enter):')
     case $a in
     1)
         memory_check
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     2)
         cpu_check
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     3)
         install_da_auto
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     4)
-        install_da_manual
+        install_da_only
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     5)
-        install_openlitespeed
+        install_da_nopre
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     6)
-        install_mariadb
+        install_da_manual
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     7)
-        install_memcache
+        install_openlitespeed
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     8)
-        install_redis
+        install_mariadb
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     9)
-        install_firewal
+        install_memcache
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     10)
-        install_rclone
+        install_redis
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     11)
-        active_da
+        install_firewal
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     12)
-        one_click_myAdmin
+        install_rclone
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     13)
-        config_opcache
+        active_da
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     14)
-        config_mecache
+        active_da
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     15)
-        config_redis
+        active_da_openvz
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     16)
-        config_ols
+        config_auto_system
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     17)
         config_directAdmin
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     18)
-        config_auto_system
+        one_click_myAdmin
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     19)
-        config_php56
+        config_opcache
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     20)
-        config_php73
+        config_mecache
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     21)
-        config_php74
+        config_redis
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     22)
-        config_php80
+        config_ols
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     23)
-        restart_ols
+        config_php56
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     24)
-        change_port_da
+        config_php73
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     25)
-        change_port_csf
+        config_php74
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     26)
-        fix_start
+        config_php80
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     27)
-        auto_system_clean
+        get_myAdmin_pass
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     28)
-        directadmin_clean
+        get_daAdmin_pass
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     29)
-        reboot_vps
+        change_hostname
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     30)
-        restart_da
+        change_port_da
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     31)
-        get_myAdmin_pass
+        change_port_csf
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     32)
-        get_daAdmin_pass
+        change_pass_centos
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     33)
         change_pass_da
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     34)
         change_pass_vps
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     35)
         rename_auto_system
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     36)
-        active_da
+        restart_ols
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     37)
-        active_da_openvz
+        restart_da
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     38)
-        install_da_only
+        fix_start
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     39)
-        install_da_nopre
+        reboot_vps
+        pause ' Nhấn [Enter] để tiếp tục...';
+        menu
+        ;;
+    40)
+        speed_test
+        pause ' Nhấn [Enter] để tiếp tục...';
+        menu
+        ;;
+    41)
+        speed_test_share
+        pause ' Nhấn [Enter] để tiếp tục...';
+        menu
+        ;;
+    42)
+        clean_da
+        pause ' Nhấn [Enter] để tiếp tục...';
+        menu
+        ;;
+    43)
+        clean_auto_system
+        pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
     0) exit 0 ;;
