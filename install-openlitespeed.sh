@@ -11,4 +11,4 @@ cd /usr/local/directadmin/custombuild;
 ./build php n;
 ./build rewrite_confs;
 rm -f /root/crontab;
-wget -P /root/ https://raw.githubusercontent.com/minhvinhdao/Finaly-All-In-One-DirectAdmin/main/crontab && chmod 644 /root/crontab;
+wget -P /root/ https://raw.githubusercontent.com/minhvinhdao/DA/main/crontab && chmod 644 /root/crontab;

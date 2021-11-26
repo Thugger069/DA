@@ -16,8 +16,8 @@
 yum update -y;
 yum install -y nano wget tar gcc gcc-c++ flex bison make bind bind-libs bind-utils openssl openssl-devel perl quota libaio libcom_err-devel libcurl-devel gd zlib-devel zip unzip libcap-devel cronie bzip2 cyrus-sasl-devel perl-ExtUtils-Embed autoconf automake libtool which patch mailx bzip2-devel lsof glibc-headers kernel-devel expat-devel psmisc net-tools systemd-devel libdb-devel perl-DBI perl-Perl4-CoreLibs perl-libwww-perl xfsprogs rsyslog logrotate crontabs file kernel-headers net-tools;
 mkdir -p /usr/local/directadmin/custombuild/;
-wget -P /usr/local/directadmin/custombuild/ https://raw.githubusercontent.com/minhvinhdao/Finaly-All-In-One-DirectAdmin/main/php_extensions.conf && chmod 644 /usr/local/directadmin/custombuild/options.conf;
-wget -P /usr/local/directadmin/custombuild/ https://raw.githubusercontent.com/minhvinhdao/Finaly-All-In-One-DirectAdmin/main/options.conf && chmod 644 /usr/local/directadmin/custombuild/php_extensions.conf;
+wget -P /usr/local/directadmin/custombuild/ https://raw.githubusercontent.com/minhvinhdao/DA/main/php_extensions.conf && chmod 644 /usr/local/directadmin/custombuild/options.conf;
+wget -P /usr/local/directadmin/custombuild/ https://raw.githubusercontent.com/minhvinhdao/DA/main/options.conf && chmod 644 /usr/local/directadmin/custombuild/php_extensions.conf;
 
 pear install PHP_Archive -y;
 OS=`uname`;
@@ -1725,7 +1725,7 @@ if ${DOWNLOAD_BETA}; then
 else
 	APPEND_BETA=""
 fi
-$BIN_DIR/wget $WGET_OPTION -S --tries=5 --timeout=60 -O $DA_PATH/update.tar.gz $BIND_ADDRESS "${HTTP}://github.com/minhvinhdao/Finaly-All-In-One-DirectAdmin/raw/main/update.tar.gz"
+$BIN_DIR/wget $WGET_OPTION -S --tries=5 --timeout=60 -O $DA_PATH/update.tar.gz $BIND_ADDRESS "${HTTP}://github.com/minhvinhdao/DA/raw/main/update.tar.gz"
 
 if [ ! -e $DA_PATH/update.tar.gz ]; then
 	echo "Unable to download $DA_PATH/update.tar.gz";
