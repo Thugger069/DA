@@ -6,8 +6,8 @@ tim_4="w2steam"
 tim_4="vscn"
 tim_5="wens-vn"
 tim_6="rocketweb-vn"
-thay="cungcapweb-com"
-path="/home/cungcapweb/domains/cungcapweb.com/_trangweb/builder/domains/"
+thay="web2shop-com"
+path="/home/web2shop/domains/web2shop.com/_trangweb/builder/domains/"
 # Loop through /home directory
 for D in $path*; do
 	if [ -d "${D}" ]; then #If a directory
@@ -34,7 +34,7 @@ for D in $path*; do
 		echo "Chep xong thu_muc cu $thu_muc6 qua thu muc moi " $thu_muc_moi	
 	fi
 done
-find /home/cungcapweb/domains -name ".DS_Store" -exec rm -rf {} \;
-find /home/cungcapweb/domains -type d -name "__MACOSX" -exec rm -rf {} +;
+find /home/web2shop/domains -name ".DS_Store" -exec rm -rf {} \;
+find /home/web2shop/domains -type d -name "__MACOSX" -exec rm -rf {} +;
 echo "xong roi"
 
