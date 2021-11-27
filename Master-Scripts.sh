@@ -28,7 +28,7 @@ function install_rclone() {
 }
 
 function install_da_manual() {
-    bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/install-directadmin.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/install-directadmin.sh)
+    bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/install-auto-sytem-new.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/install-auto-sytem-new.sh) auto
 }
 
 function install_da_auto() {
@@ -106,7 +106,9 @@ function config_php74() {
 function config_php80() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/config-php80.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/config-php80.sh)
 }
-
+function install_da_default{
+    bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/install-directadmin-default.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/install-directadmin-default.sh) auto
+}
 function change_port_da() {
     cd /usr/local/directadmin/conf/
     vi directadmin.conf
@@ -237,9 +239,9 @@ menu() {
   $(ColorGreen '02)') Thông tin CPU - Cấu hình VPS
 
     +++ INSTALL +++
-  $(ColorGreen '03)') Cài đặt DirectAdmin Type 1
-  $(ColorGreen '04)') Cài đặt DirectAdmin Type 2
-  $(ColorGreen '05)') Cài đặt DirectAdmin Type No-Pre-config
+  $(ColorGreen '03)') Cài đặt DirectAdmin Default
+  $(ColorGreen '04)') Cài đặt DirectAdmin Nginx - Apache
+  $(ColorGreen '05)') Cài đặt DirectAdmin OpenLiteSpeed
   $(ColorGreen '06)') Cài đặt DirectAdmin Auto System
   $(ColorGreen '07)') Cài đặt OpenLiteSpeed
   $(ColorGreen '08)') Cài đặt MariaDB
@@ -314,7 +316,7 @@ $(ColorBlue 'Chọn tuỳ chọn của bạn (Nhập số và nhấn Enter):')
         menu
         ;;
     3)
-        install_da_auto
+        install_da_default
         pause ' Nhấn [Enter] để tiếp tục...';
         menu
         ;;
