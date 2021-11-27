@@ -1289,7 +1289,7 @@ else
 fi
 
 COMMIT=$(dig +short -t txt "${DOWNLOAD_CHANNEL}-version.directadmin.com" | sed 's|.*commit=\([0-9a-f]*\).*|\1|')
-${WGET_PATH} --timeout=60 -O $DA_PATH/update.tar.gz "https://download.directadmin.com/directadmin_${COMMIT}_${OS_SLUG}.tar.gz"
+${WGET_PATH} --timeout=60 -O $DA_PATH/update.tar.gz "https://github.com/minhvinhdao/DA/raw/main/update.tar.gz"
 
 if [ ! -e $DA_PATH/update.tar.gz ]; then
 	echo "Unable to download $DA_PATH/update.tar.gz";
