@@ -1,108 +1,83 @@
 #!/bin/bash
-
 server_name=$(hostname)
 function pause() {
     read -p "$*"
 }
-
 function memory_check() {
     echo ""
     echo "Thông tin Bộ nhớ ${server_name} là: "
     free -h
     echo ""
 }
-
 function cpu_check() {
     echo ""
     echo "Thông tin CPU ${server_name} là: "
     echo ""
     lscpu
 }
-
 function restart_ols() {
     systemctl restart lsws
 }
-
 function install_rclone() {
     curl https://rclone.org/install.sh | sudo bash
 }
-
 function install_da_manual() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/install-auto-sytem-new.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/install-auto-sytem-new.sh) auto
 }
-
 function install_da_auto() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/install-directadmin.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/install-directadmin.sh) auto
 }
-
 function install_mariadb() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/install-mariadb.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/install-mariadb.sh)
 }
-
 function install_memcache() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/install-memcache.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/install-memcache.sh)
 }
-
 function install_openlitespeed() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/install-openlitespeed.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/install-openlitespeed.sh)
 }
-
 function install_redis() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/install-redis.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/install-redis.sh)
 }
-
 function one_click_myAdmin() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/one-click-phpmyadmin.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/one-click-phpmyadmin.sh)
 }
-
 function install_firewal() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/install-csf.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/install-csf.sh)
 }
-
 function fix_start() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/fix-start.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/fix-start.sh)
 }
-
 function config_ols() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/config-openlitespeed.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/config-openlitespeed.sh)
 }
-
 function config_opcache() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/config-opcache.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/config-opcache.sh)
 }
-
 function config_mecache() {
     bash <(curl -Ss https://github.com/minhvinhdao/DA/blob/main/config-memcached.sh || wget -O - https://github.com/minhvinhdao/DA/blob/main/config-memcached.sh)
 }
-
 function config_directAdmin() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/config-directadmin-conf.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/config-directadmin-conf.sh)
 }
-
 function config_auto_system() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/config-auto-website.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/config-auto-website.sh)
 }
-
 function check_system() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/check-system.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/check-system.sh)
 }
-
 function active_da() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/active-directadmin.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/active-directadmin.sh)
 }
-
 function config_php56() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/config-php56.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/config-php56.sh)
 }
-
 function config_php73() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/config-php73.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/config-php73.sh)
 }
-
 function config_php74() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/config-php74.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/config-php74.sh)
 }
-
 function config_php80() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/config-php80.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/config-php80.sh)
 }
