@@ -106,7 +106,7 @@ function config_php74() {
 function config_php80() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/config-php80.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/config-php80.sh)
 }
-function install_da_default{
+function install_da_default {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/install-directadmin-default.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/install-directadmin-default.sh) auto
 }
 function change_port_da() {
