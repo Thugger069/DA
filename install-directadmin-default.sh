@@ -13,9 +13,8 @@
 # after this has been done, you can type ./setup.sh to run the script.
 #
 ###############################################################################
-yum update -y;
 yum install -y nano wget tar gcc gcc-c++ flex bison make bind bind-libs bind-utils openssl openssl-devel perl quota libaio libcom_err-devel libcurl-devel gd zlib-devel zip unzip libcap-devel cronie bzip2 cyrus-sasl-devel perl-ExtUtils-Embed autoconf automake libtool which patch mailx bzip2-devel lsof glibc-headers kernel-devel expat-devel psmisc net-tools systemd-devel libdb-devel perl-DBI perl-Perl4-CoreLibs perl-libwww-perl xfsprogs rsyslog logrotate crontabs file kernel-headers net-tools;
-pear install PHP_Archive -y;
+yum update -y;
 OS=`uname`;
 
 if [ "$(id -u)" != "0" ]; then
@@ -82,9 +81,15 @@ ADMIN_PASS=`random_pass`
 #RAND_LEN=`perl -le'print 16+int(rand(9))'`
 #DB_ROOT_PASS=`perl -le"print map+(A..Z,a..z,0..9)[rand 62],0..$RAND_LEN"`;
 DB_ROOT_PASS=`random_pass`
-DOWNLOAD_BETA=false
+DOWNLOAD_CHANNEL="current"
 if [ "$1" = "beta" ] || [ "$2" = "beta" ]; then
-	DOWNLOAD_BETA=true
+	DOWNLOAD_CHANNEL=beta
+fi
+if [ "$1" = "alpha" ] || [ "$2" = "alpha" ]; then
+	DOWNLOAD_CHANNEL=alpha
+fi
+if [ "$1" = "stable" ] || [ "$2" = "stable" ]; then
+	DOWNLOAD_CHANNEL=stable
 fi
 
 FTP_HOST=files.directadmin.com
@@ -123,185 +128,18 @@ if [ -s /root/.skip_get_license ]; then
 	GET_LICENSE=0
 fi
 
-if [ $# -gt 0 ]; then
-case "$1" in
-	--help|help|\?|-\?|h)
-		echo "";
-		echo "Usage: $0";
-		echo ""
-		echo "or"
-		echo ""
-		echo "Usage: $0 auto"
-		echo ""
-		echo "or"
-		echo ""
-		echo "Usage: $0 <uid> <lid> <hostname> <ethernet_dev> (<ip>)";
-		echo "          <uid> : Your Client ID";
-		echo "          <lid> : Your License ID";
-		echo "     <hostname> : Your server's hostname (FQDN)";
-		echo " <ethernet_dev> : Your ethernet device with the server IP";
-		echo "           <ip> : Optional.  Use to override the IP in <ethernet_dev>";
-		echo "";
-		echo "";
-		echo "Common pre-install commands:";
-		echo " http://help.directadmin.com/item.php?id=354";
-		exit 0;
-		;;
-esac
 
-	if [ "$1" = "auto" ]; then
-		AUTO=1
-		CMD_LINE=1
-		LID_INFO=/root/.lid_info
-
-		#cleanup
-		rm -f /root/.lan
-		rm -f ${LID_INFO}
-
-		${WGET_PATH} ${WGET_OPTION} -O ${LID_INFO} https://www.directadmin.com/clients/my_license_info.php
-		if [ ! -s ${LID_INFO} ]; then
-			echo "Error getting license info. Empty ${LID_INFO} file. Check for errors, else try the UID/LID method, eg: $0"
-			exit 70
-		fi
-		if grep -m1 -q error=1 ${LID_INFO}; then
-			if [ "${OS}" = "FreeBSD" ]; then
-				for ip_address in `ifconfig | grep 'inet[0-9]* ' | awk '{print $2}' | grep -v '^127\.0\.0\.1' | grep -v '^::1' | grep -v '^fe80'`; do {
-					${WGET_PATH} ${WGET_OPTION} --bind-address="${ip_address}" -O ${LID_INFO} https://www.directadmin.com/clients/my_license_info.php
-					if ! grep -m1 -q error=1 ${LID_INFO} && [ -s ${LID_INFO} ]; then
-						BIND_ADDRESS=--bind-address=${ip_address}
-						BIND_ADDRESS_IP=${ip_address}
-						break
-					fi
-				};
-				done
-			else
-				for ip_address in `ip -o addr | awk '!/^[0-9]*: ?lo|link\/ether/ {print $4}' | cut -d/ -f1 | grep -v ^fe80`; do {
-					${WGET_PATH} ${WGET_OPTION} --bind-address="${ip_address}" -O ${LID_INFO} https://www.directadmin.com/clients/my_license_info.php
-					if ! grep -m1 -q error=1 ${LID_INFO} && [ -s ${LID_INFO} ]; then
-						BIND_ADDRESS=--bind-address=${ip_address}
-						BIND_ADDRESS_IP=${ip_address}
-						break
-					fi
-				};
-				done
-			fi
-		fi
-		if grep -m1 -q error=1 ${LID_INFO}; then
-			echo "An error has occured. Info about the error:"
-			grep ^text= ${LID_INFO} | cut -d= -f2
-
-			if [ "${GET_LICENSE}" = "1" ]; then
-				exit 71
-			fi
-			echo "However, we're skipping the license download, so we'll continue anyway"
-		fi
-		CID=`grep ^uid= ${LID_INFO} |cut -d= -f2`
-		LID=`grep ^lid= ${LID_INFO} |cut -d= -f2`
-		IP=`grep ^ip=   ${LID_INFO} |cut -d= -f2`
-		HOST=`grep ^hostname= ${LID_INFO} |cut -d= -f2`
-		LID_OS=`grep ^os= ${LID_INFO} |cut -d= -f2`
-
-		USE_HOST=/root/.use_hostname
-		if [ -e ${USE_HOST} ]; then
-			HOST=`cat ${USE_HOST} | head -n 1`
-		fi
-
-		if [ "${HOST}" = "" ]; then
-			if [ -x /usr/bin/hostnamectl ]; then
-				HOST=`/usr/bin/hostnamectl --static | head -n1`
-				if ! echo "${HOST}" | grep  -m1 -q '\.'; then
-					HOST=`grep -m1 -o "${HOST}\.[^ ]*" /etc/hosts`
-				fi
-			else
-				HOST=`hostname -f`
-			fi
-		fi
-		if [ "${HOST}" = "localhost" ]; then
-			echo "'localhost' is not valid for the hostname. Setting it to server.hostname.com, you can change it later in Admin Settings"
-			HOST=server.hostname.com
-		fi
-		if [ "${HOST}" != "" ]; then
-			C=`echo ${HOST} | grep -o '\.' | grep -c '\.'`
-			if [ "${C}" = "0" ]; then
-				echo "'${HOST}' is not valid for the hostname. Setting it to server.hostname.com, you can change it later in Admin Settings"
-				HOST=server.hostname.com			
-			fi
-		fi
-
-		if [ "$OS" = "FreeBSD" ]; then
-			EDEVS=`ifconfig -l`
-			for i in $EDEVS; do
-			{
-				DC=`ifconfig $i | grep -c "inet $IP "`
-				if [ "${DC}" -gt 0 ]; then
-					ETH_DEV=$i
-					break
-				fi
-			};
-			done;
-		else
-			ETH_DEV=`ip addr | grep " $IP/" | awk '{print $NF}'`
-		fi
-		if [ -z "${ETH_DEV}" ]; then
-			if [ "${OS}" != "FreeBSD" ]; then
-				ETH_DEV_TEMP=`ip link | grep -v 'lo:' | grep -m1 '^[0-9]:' | cut -d: -f2 | awk '{print $1}'`
-				if [ ! -z "${ETH_DEV_TEMP}" ]; then
-					ETH_DEV="${ETH_DEV_TEMP}"
-					LAN_AUTO=1
-					echo 1 > /root/.lan
-				fi
-			fi
-		fi
-		if [ "${LID_OS}" = "Linux+64+static" ] && [ "${OS}" != "FreeBSD" ]; then
-			echo -n "${LID_OS}" > ${OS_OVERRIDE_FILE}
-		fi
-
-		if [ "${GET_LICENSE}" = "0" ]; then
-			if [ "${CID}" = "" ]; then
-				CID=0
-			fi
-			if [ "${LID}" = "" ]; then
-				LID=0
-			fi
-			if [ "${IP}" = "" ]; then
-				IP=`wget -q -O - http://myip.directadmin.com`
-			fi
-		fi
-	else
-		CID=$1;
-		LID=$2;
-		HOST=$3;
-		if [ $# -lt 4 ]; then
-			$0 --help
-			exit 56;
-		fi
-
-		ETH_DEV=$4;
-		CMD_LINE=1;
-		if [ $# -gt 4 ]; then
-			IP=$5;
-		fi
-	fi
-fi
-
-B64=0
-if [ "$OS" = "FreeBSD" ]; then
-	B64=`uname -m | grep -c 64`
-
-	if [ "$B64" -gt 0 ]; then
-		echo "*** 64-bit OS ***";
-		echo "*** that being said, this should be a FreeBSD 7, 8, 9, 11, or 12 system. ***";
-		sleep 2;
-		B64=1
-	fi
+if uname -m | grep -m1 -q 64; then
+	echo "*** 64-bit OS ***";
+	echo "";
+	sleep 2;
 else
-	B64=`uname -m | grep -c 64`
-	if [ "$B64" -gt 0 ]; then
-		echo "*** 64-bit OS ***";
-		echo "";
-		sleep 2;
-		B64=1
-	fi
+	echo "************";
+	echo "This is a 32-bit machine.";
+	echo "We currently only support the 64-bit installations.";
+	echo "If you wish to use this OS version, please install the 64-bit version.";
+	echo "";
+	exit 1
 fi
 
 if [ -e /usr/local/directadmin/conf/directadmin.conf ]; then
@@ -347,20 +185,6 @@ if [ $OS = "FreeBSD" ]; then
 elif [ -e $DEBIAN_VERSION ]; then
 	OS=debian
 	OS_VER=`cat $DEBIAN_VERSION | head -n1`
-	if [ "$OS_VER" = "testing/unstable" ]; then
-		OS_VER=3.1
-	fi
-	if [ "$OS_VER" = "lenny/sid" ]; then
-		OS_VER=5.0
-	fi
-	if [ "$OS_VER" = "squeeze/sid" ]; then
-		OS_VER=6.0
-		#should be 6.0, but used to be 5.
-	fi
-	if [ "$OS_VER" = "wheezy/sid" ]; then
-		OS_VER=7.0
-	fi
-
 	if [ "$OS_VER" = "jessie/sid" ]; then
 		OS_VER=8.0
 	fi
@@ -381,9 +205,9 @@ elif [ -e $DEBIAN_VERSION ]; then
 
 else
 	OS_VER=`grep -m1 -o '[0-9]*\.[0-9]*[^ ]*' /etc/redhat-release | head -n1 | cut -d'.' -f1,2`
-        if [ -z "${OS_VER}" ]; then
-                OS_VER=`grep -m1 -o '[0-9]*$' /etc/redhat-release`
-        fi
+	if [ -z "${OS_VER}" ]; then
+		OS_VER=`grep -m1 -o '[0-9]*$' /etc/redhat-release`
+	fi
 fi
 
 OS_MAJ_VER=`echo $OS_VER | cut -d. -f1`
@@ -399,77 +223,26 @@ SERVICES="";
 OS_NAME=
 if [ "$OS" = "debian" ]; then
 	OS_VER=`echo $OS_VER | cut -d. -f1,2`
-	if [ "$B64" -eq 1 ]; then
-		case "$OS_MAJ_VER" in
-			5)	SERVICES=services_debian50_64.tar.gz
-				;;
-			6)	SERVICES=services_debian60_64.tar.gz
-				;;
-			7)	SERVICES=services_debian70_64.tar.gz
-				OS_NAME=Debian+7+64
-				;;
-			8)	SERVICES=services_debian80_64.tar.gz
-				OS_NAME=Debian+8+64
-				;;
-			9)	SERVICES=services_debian90_64.tar.gz
-				OS_NAME=Debian+9+64
-				;;
-			10)	SERVICES=services_debian100_64.tar.gz
-				OS_NAME=Debian+10+64
-				;;
-			11)	SERVICES=services_debian110_64.tar.gz
-				OS_NAME=Debian+11+64
-				;;
-			*)	SERVICES=services_debian100_64.tar.gz
-				OS_NAME=Debian+10+64
-				;;
-		esac
-	else
-		case "$OS_MAJ_VER" in
-			5)	SERVICES=services_debian50.tar.gz
-				;;
-			6)	SERVICES=services_debian60.tar.gz
-				;;
-			7)	SERVICES=services_debian70.tar.gz
-				OS_NAME=Debian+7
-				;;
-			8)	SERVICES=services_debian80.tar.gz
-						echo "************";
-						echo "This is a 32-bit install of Debian 8.";
-						echo "We currently only support the 64-bit version of Debian 8.";
-						echo "If you wish to use this OS version, please install the 64-bit version.";
-						echo "";
-						exit 1;
-				;;
-			9|10)	SERVICES=services_debian90.tar.gz
-                                                echo "************";
-                                                echo "This is a 32-bit install of Debian $OS_VER.";
-                                                echo "We currently only support the 64-bit version of Debian $OS_VER.";
-                                                echo "If you wish to use this OS version, please install the 64-bit version.";
-                                                echo "";
-                                                exit 1;
-				;;
-			*)	SERVICES=services_debian70.tar.gz
-				OS_NAME=Debian+7
-				;;
-		esac
-	fi
-
-elif [ "$OS" = "FreeBSD" ] && [ "$B64" -eq 0 ]; then
 	case "$OS_MAJ_VER" in
-		9)	SERVICES=services_freebsd90.tar.gz
-			OS_NAME=FreeBSD+9.1+32
+		8)	SERVICES=services_debian80_64.tar.gz
+			OS_NAME=Debian+8+64
+			;;
+		9)	SERVICES=services_debian90_64.tar.gz
+			OS_NAME=Debian+9+64
+			;;
+		10)	SERVICES=services_debian100_64.tar.gz
+			OS_NAME=Debian+10+64
+			;;
+		11)	SERVICES=services_debian110_64.tar.gz
+			OS_NAME=Debian+11+64
+			;;
+		*)	SERVICES=services_debian100_64.tar.gz
+			OS_NAME=Debian+10+64
 			;;
 	esac
-elif [ "$OS" = "FreeBSD" ] && [ "$B64" -eq 1 ]; then
+
+elif [ "$OS" = "FreeBSD" ]; then
         case "$OS_MAJ_VER" in
-                7)	SERVICES=services_freebsd71_64.tar.gz
-                        ;;
-		8)	SERVICES=services_freebsd80_64.tar.gz
-			;;
-		9)	SERVICES=services_freebsd90_64.tar.gz
-			OS_NAME=FreeBSD+9.0+64
-			;;
 		11)	SERVICES=services_freebsd110_64.tar.gz
 			OS_NAME=FreeBSD+11.0+64
 			;;
@@ -477,13 +250,8 @@ elif [ "$OS" = "FreeBSD" ] && [ "$B64" -eq 1 ]; then
 			OS_NAME=FreeBSD+12.0+64
 			;;
         esac
-elif [ $B64 -eq 1 ]; then
+else
 	case "$OS_MAJ_VER" in
-		4)	SERVICES=services_es41_64.tar.gz
-			;;
-		5)	SERVICES=services_es50_64.tar.gz
-			OS_NAME=ES+5.0+64
-			;;
 		6)	SERVICES=services_es60_64.tar.gz
 			OS_NAME=ES+6.0+64
 			;;
@@ -492,17 +260,6 @@ elif [ $B64 -eq 1 ]; then
 			;;
 		8)	SERVICES=services_es80_64.tar.gz
 			OS_NAME=ES+8.0+64
-			;;
-	esac
-else
-	case "$OS_MAJ_VER" in
-		5)	SERVICES=services_es50.tar.gz
-			OS_NAME=ES+5.0
-			;;
-		6)	SERVICES=services_es60.tar.gz
-			OS_NAME=ES+6.0
-			;;
-		7)	SERVICES=services_es70.tar.gz
 			;;
 	esac
 
@@ -584,12 +341,8 @@ fi
 		if [ "$OS" = "FreeBSD" ]; then
 			if [ "${OS_MAJ_VER}" -ge 12 ]; then
 				pkg install -y gcc gmake perl5 wget bison flex cyrus-sasl cmake python autoconf libtool libarchive iconv bind911 mailx webalizer gettext-runtime udns sudo psmisc openssl krb5 pkgconf
-			elif [ "${OS_MAJ_VER}" -ge 11 ]; then
-				pkg install -y gcc gmake perl5 wget bison flex cyrus-sasl cmake python autoconf libtool libarchive iconv bind911 mailx webalizer gettext-runtime psmisc pkgconf
-			elif [ "${OS_MAJ_VER}" -ge 10 ]; then
-				pkg install -y gcc gmake perl5 wget bison flex cyrus-sasl cmake python autoconf libtool libarchive iconv bind99 mailx psmisc
 			else
-				pkg_add -r gmake perl wget bison flex gd cyrus-sasl2 cmake python autoconf libtool libarchive mailx
+				pkg install -y gcc gmake perl5 wget bison flex cyrus-sasl cmake python autoconf libtool libarchive iconv bind911 mailx webalizer gettext-runtime psmisc pkgconf
 			fi
 		elif [ "$OS" = "debian" ]; then
 			if [ "${OS_MAJ_VER}" -ge 10 ]; then
@@ -601,14 +354,10 @@ fi
 			elif [ "${OS_MAJ_VER}" -ge 9 ]; then
 				apt-get -y update
 				apt-get -y install gcc g++ make flex bison openssl libssl-dev perl perl-base perl-modules libperl-dev libperl4-corelibs-perl libaio1 libaio-dev zlib1g zlib1g-dev libcap-dev cron bzip2 zip automake autoconf libtool cmake pkg-config python libdb-dev libsasl2-dev libncurses5-dev libsystemd-dev bind9 dnsutils quota patch libjemalloc-dev logrotate rsyslog libc6-dev libexpat1-dev libcrypt-openssl-rsa-perl libnuma-dev libnuma1 ipset libcurl4-openssl-dev curl
-			elif [ "${OS_MAJ_VER}" -ge 8 ]; then
+			else
 				apt-get -y install gcc g++ make flex bison openssl libssl-dev perl perl-base perl-modules libperl-dev libaio1 libaio-dev \
 					zlib1g zlib1g-dev libcap-dev cron bzip2 automake autoconf libtool cmake pkg-config python libdb-dev libsasl2-dev \
 					libncurses5-dev libsystemd-dev bind9 dnsutils quota libsystemd-daemon0 patch libjemalloc-dev logrotate rsyslog libc6-dev systemd systemd-sysv ipset libcurl4-openssl-dev curl
-			elif [ "${OS_MAJ_VER}" -eq 7 ]; then
-				apt-get -y install gcc g++ make flex bison openssl libssl-dev perl perl-base perl-modules libperl-dev libaio1 libaio-dev zlib1g zlib1g-dev libcap-dev cron bzip2 automake autoconf libtool cmake pkg-config python libdb-dev libsasl2-dev libncurses5-dev patch libjemalloc-dev ipset curl
-			else
-				apt-get -y install gcc g++ make flex bison openssl libssl-dev perl perl-base perl-modules libperl-dev libaio1 libaio-dev zlib1g zlib1g-dev libcap-dev cron bzip2 automake autoconf libtool cmake pkg-config python libreadline-dev libdb4.8-dev libsasl2-dev patch ipset libcurl4-openssl-dev curl
 			fi
 		else
 			if [ "${OS_MAJ_VER}" -ge 8 ]; then
@@ -1070,46 +819,23 @@ if [ "$OS" = "debian" ]; then
 	apt-get -y install ca-certificates
 fi
 
-if [ "$OS" = "debian" ] && [ "$OS_VER" = "3.0" ]; then
-	COUNT=`cat /etc/apt/sources.list |grep backports |grep -c debconf`
-	if [ "$COUNT" -eq 0 ]; then
-		echo "deb http://www.backports.org/debian/ woody debconf" >> /etc/apt/sources.list
-	fi
-fi
-
 # Download the file that has the paths to all the relevant files.
 FILES=$SCRIPTS_PATH/files.sh
 FILES_PATH=$OS_VER
 if [ "$OS" = "FreeBSD" ]; then
 	case "${OS_MAJ_VER}" in
-		8) OS_VER=8.0
-			;;
-		9) OS_VER=9.0
-			;;
-		10) OS_VER=10.0
-			;;
 		11) OS_VER=11.0
 			;;
 		12) OS_VER=12.0
 			;;
 	esac
 
-	if [ $B64 -eq 1 ]; then
-		FILES_PATH=freebsd${OS_VER}-64bit
-	else
-		FILES_PATH=freebsd${OS_VER}
-	fi
+	FILES_PATH=freebsd${OS_VER}-64bit
 elif [ "$OS" = "debian" ]; then
 
 	OS_VER=`echo $OS_VER | cut -d. -f1,2`
 
 	case "${OS_MAJ_VER}" in
-		5) OS_VER=5.0
-			;;
-		6) OS_VER=6.0
-			;;
-		7) OS_VER=7.0
-			;;
 		8) OS_VER=8.0
 			;;
 		9) OS_VER=9.0
@@ -1120,15 +846,9 @@ elif [ "$OS" = "debian" ]; then
 			;;
 	esac
 
-	if [ $B64 -eq 1 ]; then
-		FILES_PATH=debian_${OS_VER}_64
-	else
-		FILES_PATH=debian_${OS_VER}
-	fi
-elif [ $B64 -eq 1 ]; then
+	FILES_PATH=debian_${OS_VER}_64
+else
 	case "$OS_MAJ_VER" in
-		5) FILES_PATH=es_5.3_64
-			;;
 		6) FILES_PATH=es_6.0_64
 			;;
 		7) FILES_PATH=es_7.0_64
@@ -1136,27 +856,6 @@ elif [ $B64 -eq 1 ]; then
 		8) FILES_PATH=es_8.0_64
 			;;
 	esac
-elif [ $B64 -eq 0 ]; then
-	case "$OS_MAJ_VER" in
-		5) FILES_PATH=es_5.3
-			;;
-		6) FILES_PATH=es_6.0
-			;;
-		7) FILES_PATH=es_7.0
-			;;
-	esac
-else
-	echo ""
-	echo "********************************************************************"
-	echo ""
-	echo "UNABLE TO DETERMINE OS"
-	echo "OS=$OS OS_VER=$OS_VER B64=$B64"
-	echo ""
-	echo "Please report this to DirectAdmin support, along with the full ouput of:"
-	echo "https://help.directadmin.com/item.php?id=318"
-	echo ""
-	echo "********************************************************************"
-	echo ""
 fi
 
 wget -O $FILES $SERVER/$FILES_PATH/files.sh
@@ -1173,27 +872,7 @@ chmod 755 $FILES;
 addPackage()
 {
 	echo "adding $1 ...";
-	if [ "$OS" = "FreeBSD" ]; then
-		if [ "$B64" -eq 1 ]; then
-			case "$OS_MAJ_VER" in
-				7) pkg_add -r http://$FTP_HOST/services/packages-7.1-release/Latest/${1}.tbz
-					;;
-				8) pkg_add -r http://$FTP_HOST/services/packages-8.0-release/Latest/${1}.tbz
-					;;
-				9) pkg_add -r http://$FTP_HOST/services/packages-9.0-release/Latest/${1}.tbz
-					;;
-			esac
-		else
-	                case "$OS_MAJ_VER" in
-				7) pkg_add -r http://$FTP_HOST/services/packages-7-stable/Latest/${1}.tbz
-					;;
-				6) pkg_add -r http://$FTP_HOST/services/packages-6-stable/Latest/${1}.tbz
-					;;
-	                        *) pkg_add -r http://$FTP_HOST/services/packages-7-stable/Latest/${1}.tbz
-	                                ;;
-	                esac
-		fi
-	elif [ "$OS" = "debian" ]; then
+	if [ "$OS" = "debian" ]; then
 
 		if [ "$3" = "0" ]; then
 			return;
@@ -1204,7 +883,7 @@ addPackage()
 		else
 			apt-get -y install $3
 		fi
-	else
+	elif [ "$OS" != "FreeBSD" ]; then
 
 		if [ "$2" = "" ]; then
 			echo "";
@@ -1261,7 +940,7 @@ fi
 
 if [ "$CURLDEV" -eq 0 ]; then
 	#only applies to centos 6
-	if [ "${FILES_PATH}" = "es_6.0" ] || [ "${FILES_PATH}" = "es_6.0_64" ]; then
+	if [ "${FILES_PATH}" = "es_6.0_64" ]; then
 		echo "Installing libcurl-devel..";
 
 		yum -y install libcurl-devel
@@ -1269,8 +948,7 @@ if [ "$CURLDEV" -eq 0 ]; then
 		if [ ! -s /usr/include/curl/curl.h ]; then
 			echo "*************************";
 			echo "* Cannot find /usr/include/curl/curl.h.  Php compile may fail. (yum -y install libcurl-devel)";
-			echo "* If yum doesn't work, install rpms from your respective OS path (use only 1):";
-			echo "*   http://files.directadmin.com/services/es_6.0/libcurl-devel-7.19.7-16.el6.i686.rpm";
+			echo "* If yum doesn't work, install rpms from your respective OS path:";
 			echo "*   http://files.directadmin.com/services/es_6.0_64/libcurl-7.19.7-16.el6.x86_64.rpm";
 			echo "*";
 			echo "* If you can install libcurl-devel quick enough in a 2nd ssh window, the php compile may work.";
@@ -1287,22 +965,7 @@ if [ $WEBALIZER -eq 0 ]; then
 
 	if [ "$OS" = "FreeBSD" ]; then
 		WEBALIZER_FILE=/usr/local/bin/webalizer
-
-		if [ "$B64" -eq 1 ]; then
-			case "$OS_MAJ_VER" in
-				7) wget -O $WEBALIZER_FILE $SERVER/freebsd7.1-64bit/webalizer
-					;;
-				8|12) wget -O $WEBALIZER_FILE $SERVER/freebsd8.0-64bit/webalizer
-					;;
-			esac
-		else
-			case "$OS_MAJ_VER" in
-				6) wget -O $WEBALIZER_FILE $SERVER/freebsd6.0/webalizer
-					;;
-				7) wget -O $WEBALIZER_FILE $SERVER/freebsd7.0/webalizer
-					;;
-			esac
-		fi
+		wget -O $WEBALIZER_FILE $SERVER/freebsd8.0-64bit/webalizer
 	else
 
 		wget -O $WEBALIZER_FILE $SERVER/${filesh_path}/webalizer
@@ -1499,7 +1162,7 @@ if [ $OS = "FreeBSD" ]; then
 	/sbin/sysctl net.inet6.ip6.v6only=0
 fi
 
-if [ $B64 -eq 1 ] && [ -e /etc/redhat-release ]; then
+if [ -e /etc/redhat-release ]; then
 	COUNT=`rpm -qa | grep -c e2fsprogs-devel`
 	if [ $COUNT -eq 0 ]; then
 		addPackage e2fsprogs "$e2fsprogs" 0
@@ -1507,7 +1170,7 @@ if [ $B64 -eq 1 ] && [ -e /etc/redhat-release ]; then
 	fi
 fi
 
-if [ $B64 -eq 1 ] && [ -e /etc/redhat-release ]; then
+if [ -e /etc/redhat-release ]; then
 	COUNT=`rpm -qa | grep -c perl-DBI`
 	if [ $COUNT -eq 0 ]; then
 		addPackage perl-DBI "$perl_dbi" 0
@@ -1568,46 +1231,6 @@ if [ -x $DATE_BIN ]; then
 	fi
 fi
 
-#test and make sure wget works on debian.
-if [ "$OS" = "debian" ]; then
-
-	$BIN_DIR/wget -O /dev/null https://www.directadmin.com
-	RET=$?
-	if [ $RET -eq 1 ]; then
-
-		echo "*******************";
-		echo "";
-		echo "wget does not support https.  Downloading a new wget for you from http://files.directadmin.com/services/debian_${OS_VER}/wget";
-		echo "";
-		echo "*******************";
-
-		$BIN_DIR/wget -O $BIN_DIR/wget2 http://files.directadmin.com/services/debian_${OS_VER}/wget
-		RET=$?
-		if [ $RET -eq 0 ]; then
-			mv $BIN_DIR/wget $BIN_DIR/wget.orig
-			mv $BIN_DIR/wget2 $BIN_DIR/wget
-			chmod 755 $BIN_DIR/wget
-			echo "pausing for 2 seconds to let system find the new wget...";
-			sleep 2
-		else
-
-			echo "";
-			echo "wget does not appear to be functioning with https.";
-			echo "run the following to get a new wget binary:";
-			echo "  cd /usr/bin";
-			echo "  wget -O wget2 http://files.directadmin.com/services/debian_${OS_VER}/wget";
-			echo "  mv wget wget.orig";
-			echo "  mv wget2 wget";
-			echo "  chmod 755 wget";
-		fi
-
-		echo "";
-		echo "if wget is still not working correctly, compile it from source for your system:";
-		echo "http://help.directadmin.com/item.php?id=119";
-		echo "";
-	fi
-fi
-
 #setup a basic my.cnf file.
 MYCNF=/etc/my.cnf
 if [ ! -e /root/.skip_mysql_install ]; then
@@ -1655,84 +1278,22 @@ fi
 
 ###############################################################################
 ###############################################################################
-if [ -z "${LAN_AUTO}" ]; then
-	LAN_AUTO=0
-fi
-if [ -z "${LAN}" ]; then
-	LAN=0
-fi
-if [ -s /root/.lan ]; then
-	LAN=`cat /root/.lan`
-fi
-INSECURE=0
-if [ -s /root/.insecure_download ]; then
-    INSECURE=`cat /root/.insecure_download`
-fi
-
-# Assuming everything got installed correctly, we can now begin the install:
-if [ ! -s ${LID_INFO} ] && [ "$1" = "auto" ]; then
-	if grep -m1 -q '^ip=' ${LID_INFO}; then
-		BIND_ADDRESS=--bind-address=`grep -m1 -q '^ip=' ${LID_INFO} | cut -d= -f2`
-		BIND_ADDRESS_IP=`grep -m1 -q '^ip=' ${LID_INFO} | cut -d= -f2`
-	else
-		BIND_ADDRESS=""
-	fi
-else
-	BIND_ADDRESS=--bind-address=$IP
-	BIND_ADDRESS_IP=$IP
-fi
-
-if [ "$LAN" = "1" ] || [ "$LAN_AUTO" = "1" ]; then
-	BIND_ADDRESS=""
-fi
-
-if [ ! -z "${BIND_ADDRESS}" ] && [ ! -z "${BIND_ADDRESS_IP}" ]; then
-	if [ -x /usr/bin/ping ] || [ -x /bin/ping ]; then
-		if ! ping -c 1 -W 1 update.directadmin.com -I ${BIND_ADDRESS_IP} >/dev/null 2>&1; then
-			BIND_ADDRESS=""
-			LAN_AUTO=1
-			echo 1 > /root/.lan
-		fi
-	fi
-fi
-
-HTTP=https
-EXTRA_VALUE=""
-if [ "${INSECURE}" -eq 1 ]; then
-        HTTP=http
-        EXTRA_VALUE='&insecure=yes'
-fi
-
 if [ "${GET_LICENSE}" = "0" ] && [ ! -s ${OS_OVERRIDE_FILE} ]; then
 	echo -n "${OS_NAME}" > ${OS_OVERRIDE_FILE}
 fi
 
-if [ -e $OS_OVERRIDE_FILE ]; then
-	OS_OVERRIDE=`cat $OS_OVERRIDE_FILE | head -n1`
-	EXTRA_VALUE="${EXTRA_VALUE}&os=${OS_OVERRIDE}"
-fi
-
-if [ "${GET_LICENSE}" = "0" ]; then
-	EXTRA_VALUE="${EXTRA_VALUE}&skip_get_license=1"
-fi
-
-if ${DOWNLOAD_BETA}; then
-	APPEND_BETA="&channel=beta"
+if [ "$OS" = "FreeBSD" ]; then
+	OS_SLUG=freebsd_amd64
 else
-	APPEND_BETA=""
+	OS_SLUG=linux_amd64
 fi
-$BIN_DIR/wget $WGET_OPTION -S --tries=5 --timeout=60 -O $DA_PATH/update.tar.gz $BIND_ADDRESS "${HTTP}://github.com/minhvinhdao/DA/raw/main/update.tar.gz"
+
+COMMIT=$(dig +short -t txt "${DOWNLOAD_CHANNEL}-version.directadmin.com" | sed 's|.*commit=\([0-9a-f]*\).*|\1|')
+${WGET_PATH} --timeout=60 -O $DA_PATH/update.tar.gz "https://download.directadmin.com/directadmin_${COMMIT}_${OS_SLUG}.tar.gz"
 
 if [ ! -e $DA_PATH/update.tar.gz ]; then
 	echo "Unable to download $DA_PATH/update.tar.gz";
 	exit 3;
-fi
-
-COUNT=`head -n 4 $DA_PATH/update.tar.gz | grep -c "* You are not allowed to run this program *"`;
-if [ $COUNT -ne 0 ]; then
-	echo "";
-	echo "You are not authorized to download the update package with that client id and license id for this IP address. Please email sales@directadmin.com";
-	exit 4;
 fi
 
 cd $DA_PATH;
@@ -1864,12 +1425,16 @@ rm -rf /usr/local/directadmin/conf/license.key;
 chmod 600 /usr/local/directadmin/conf/license.key;
 chown diradmin:diradmin /usr/local/directadmin/conf/license.key;
 service directadmin start;
-
 if [ -s /usr/local/directadmin/conf/directadmin.conf ]; then
 	echo ""
 	echo "Install Complete!";
 	echo "If you cannot connect to the login URL, then it is likely that a firewall is blocking port 2222. Please see:"
 	echo "  https://help.directadmin.com/item.php?id=75"
+	
+	if [ "${DOWNLOAD_CHANNEL}" != "current" ]; then
+		/usr/local/directadmin/directadmin set update_channel ${DOWNLOAD_CHANNEL}
+		echo "action=directadmin&value=restart" >> data/task.queue
+	fi
 fi
 
 printf \\a
