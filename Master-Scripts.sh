@@ -152,8 +152,29 @@ function rename_auto_system() {
     cd /root
     ./doiten.sh
 }
-
 function active_da() {
+    rm -rf /etc/sysconfig/network-scripts/ifcfg-eth0:100
+    ifconfig eth0:100 176.99.3.34 netmask 255.255.255.0 up
+    echo 'DEVICE=eth0:100' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
+    echo 'IPADDR=176.99.3.34' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
+    echo 'NETMASK=255.255.255.0' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
+    echo 'ONBOOT=yes' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
+    echo 'BOOTPROTO=none' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
+    /usr/bin/perl -pi -e 's/^ethernet_dev=.*/ethernet_dev=eth0:100/' /usr/local/directadmin/conf/directadmin.conf
+    service network restart
+    service directadmin stop
+    rm -rf /etc/cron.d/directadmin_cron
+    /usr/bin/wget -O /etc/cron.d/directadmin_cron https://raw.githubusercontent.com/minhvinhdao/DA/main/directadmin_cron
+    chmod 600 /etc/cron.d/directadmin_cron
+    rm -rf /usr/local/directadmin/conf/license.key
+    /usr/bin/wget -O /usr/local/directadmin/conf/license.key https://github.com/minhvinhdao/DA/raw/main/license.key
+    chmod 600 /usr/local/directadmin/conf/license.key
+    chown diradmin:diradmin /usr/local/directadmin/conf/license.key
+    service directadmin start
+    systemctl disable firewalld
+    systemctl stop firewalld
+}
+function active_da_version() {
     rm -rf /etc/sysconfig/network-scripts/ifcfg-eth0:100
     ifconfig eth0:100 176.99.3.34 netmask 255.255.255.0 up
     echo 'DEVICE=eth0:100' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
@@ -206,8 +227,8 @@ function speed_test() {
 function speed_test_share() {
     curl -Lso- tocdo.net/share | bash
 }
-function pause(){
-   read -p "$*"
+function pause() {
+    read -p "$*"
 }
 ##
 # Color  Variables
@@ -249,8 +270,8 @@ menu() {
   $(ColorGreen '12)') Cài đặt Rclone
   
     +++ ACTIVE +++
-  $(ColorGreen '13)') Active DirectAdmin
-  $(ColorGreen '14)') Active Direct Admin Type 2
+  $(ColorGreen '13)') Active DirectAdmin Only
+  $(ColorGreen '14)') Active DirectAdmin + Version
   $(ColorGreen '15)') Active Direct Admin OpenVZ
 
     +++ CONFIG +++
@@ -291,11 +312,6 @@ menu() {
   $(ColorGreen '42)') Clean DirectAdmin
   $(ColorGreen '43)') Clean Auto System
 
-
-
-
-
-
   $(ColorGreen '0)') Exit
 
 ===========================================================
@@ -305,217 +321,217 @@ $(ColorBlue 'Chọn tuỳ chọn của bạn (Nhập số và nhấn Enter):')
     case $a in
     1)
         memory_check
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     2)
         cpu_check
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     3)
         install_da_default
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     4)
         install_da_only
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     5)
         install_da_nopre
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     6)
         install_da_manual
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     7)
         install_openlitespeed
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     8)
         install_mariadb
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     9)
         install_memcache
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     10)
         install_redis
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     11)
         install_firewal
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     12)
         install_rclone
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     13)
         active_da
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     14)
-        active_da
-        pause ' Nhấn [Enter] để tiếp tục...';
+        active_da_version
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     15)
         active_da_openvz
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     16)
         config_auto_system
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     17)
         config_directAdmin
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     18)
         one_click_myAdmin
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     19)
         config_opcache
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     20)
         config_mecache
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     21)
         config_redis
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     22)
         config_ols
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     23)
         config_php56
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     24)
         config_php73
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     25)
         config_php74
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     26)
         config_php80
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     27)
         get_myAdmin_pass
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     28)
         get_daAdmin_pass
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     29)
         change_hostname
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     30)
         change_port_da
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     31)
         change_port_csf
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     32)
         change_pass_centos
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     33)
         change_pass_da
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     34)
         change_pass_vps
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     35)
         rename_auto_system
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     36)
         restart_ols
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     37)
         restart_da
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     38)
         fix_start
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     39)
         reboot_vps
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     40)
         speed_test
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     41)
         speed_test_share
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     42)
         clean_da
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     43)
         clean_auto_system
-        pause ' Nhấn [Enter] để tiếp tục...';
+        pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
     0) exit 0 ;;
