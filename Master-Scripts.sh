@@ -115,14 +115,12 @@ function change_port_da() {
     killall -9 directadmin
     service directadmin restart
 }
-
 function change_port_csf() {
     vi /etc/ssh/sshd_config
     service sshd restart
     vi /etc/csf/csf.conf
     csf -r
 }
-
 function reboot_vps() {
     reboot
 }
