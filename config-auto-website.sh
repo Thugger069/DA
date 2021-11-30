@@ -39,14 +39,14 @@ chmod 644 php.ini;
 rm -f /usr/local/php56/lib/php.ini;
 wget -P /usr/local/php56/lib/ https://raw.githubusercontent.com/minhvinhdao/DA/main/php56/php.ini && chmod 644 /usr/local/php56/lib/php.ini;
 # PHP73
-rm -f /usr/local/php56/lib/php.ini;
-wget -P /usr/local/php56/lib/ https://raw.githubusercontent.com/minhvinhdao/DA/main/php73/php.ini && chmod 644 /usr/local/php73/lib/php.ini;
+rm -f /usr/local/php73/lib/php.ini;
+wget -P /usr/local/php73/lib/ https://raw.githubusercontent.com/minhvinhdao/DA/main/php73/php.ini && chmod 644 /usr/local/php73/lib/php.ini;
 # PHP74
-rm -f /usr/local/php56/lib/php.ini;
-wget -P /usr/local/php56/lib/ https://raw.githubusercontent.com/minhvinhdao/DA/main/php74/php.ini && chmod 644 /usr/local/php74/lib/php.ini;
+rm -f /usr/local/php74/lib/php.ini;
+wget -P /usr/local/php74/lib/ https://raw.githubusercontent.com/minhvinhdao/DA/main/php74/php.ini && chmod 644 /usr/local/php74/lib/php.ini;
 # PHP80
-rm -f /usr/local/php56/lib/php.ini;
-wget -P /usr/local/php56/lib/ https://raw.githubusercontent.com/minhvinhdao/DA/main/php80/php.ini && chmod 644 /usr/local/php80/lib/php.ini;
+rm -f /usr/local/php80/lib/php.ini;
+wget -P /usr/local/php80/lib/ https://raw.githubusercontent.com/minhvinhdao/DA/main/php80/php.ini && chmod 644 /usr/local/php80/lib/php.ini;
 # One Click PHPMYAMIN
 cd /usr/local/directadmin/;
 ./directadmin set one_click_pma_login 1;
