@@ -193,8 +193,8 @@ function change_pass_centos() {
     passwd
 }
 function change_hostname() {
-    vi /etc/hostname
-    hostnamectl
+    vi /etc/hostname;
+    vi /etc/hosts;
 }
 function speed_test() {
     curl -Lso- tocdo.net | bash
