@@ -14,6 +14,8 @@ yum install memcached -y;
 yum install memcached-devel -y;
 yum install libmemcached-devel -y;
 yum install libmemcached -y;
+rm -f /etc/sysconfig/memcached;
+rm -f /etc/sysconfig/memcached.1;
 wget -P /etc/sysconfig/ https://raw.githubusercontent.com/minhvinhdao/DA/main/memcached && chmod 644 /etc/sysconfig/memcached;
 wget https://raw.githubusercontent.com/poralix/directadmin-utils/master/php/php-extension.sh -O php-extension.sh;
 chmod 750 php-extension.sh;
