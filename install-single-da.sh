@@ -13,9 +13,9 @@
 # after this has been done, you can type ./setup.sh to run the script.
 #
 ###############################################################################
-yum install -y nano wget tar gcc gcc-c++ flex bison make bind bind-libs bind-utils openssl openssl-devel perl quota libaio libcom_err-devel libcurl-devel gd zlib-devel zip unzip libcap-devel cronie bzip2 cyrus-sasl-devel perl-ExtUtils-Embed autoconf automake libtool which patch mailx bzip2-devel lsof glibc-headers kernel-devel expat-devel psmisc net-tools systemd-devel libdb-devel perl-DBI perl-Perl4-CoreLibs perl-libwww-perl xfsprogs rsyslog logrotate crontabs file kernel-headers ipset;
 yum update -y;
-
+yum install -y nano wget tar gcc gcc-c++ flex bison make bind bind-libs bind-utils openssl openssl-devel perl quota libaio libcom_err-devel libcurl-devel gd zlib-devel zip unzip libcap-devel cronie bzip2 cyrus-sasl-devel perl-ExtUtils-Embed autoconf automake libtool which patch mailx bzip2-devel lsof glibc-headers kernel-devel expat-devel psmisc net-tools systemd-devel libdb-devel perl-DBI perl-Perl4-CoreLibs perl-libwww-perl xfsprogs rsyslog logrotate crontabs file kernel-headers net-tools;
+yum update -y;
 OS=`uname`;
 
 if [ "$(id -u)" != "0" ]; then
@@ -326,9 +326,9 @@ if [ -e /usr/local/cpanel ]; then
 fi
 
 OS_VER=;
-mkdir -P /usr/local/directadmin/custombuild/;
-wget -P /usr/local/directadmin/custombuild/ https://raw.githubusercontent.com/minhvinhdao/DA/main/option-single/options.conf && chmod 644 /usr/local/directadmin/custombuild/options.conf;
-wget -P /usr/local/directadmin/custombuild/ https://raw.githubusercontent.com/minhvinhdao/DA/main/option-single/php_extensions.conf && chmod 644 /usr/local/directadmin/custombuild/php_extensions.conf;
+mkdir -p /usr/local/directadmin/custombuild/;
+wget -P /usr/local/directadmin/custombuild/ https://raw.githubusercontent.com/minhvinhdao/DA/main/option-single/php_extensions.conf && chmod 644 /usr/local/directadmin/custombuild/options.conf;
+wget -P /usr/local/directadmin/custombuild/ https://raw.githubusercontent.com/minhvinhdao/DA/main/option-single/options.conf && chmod 644 /usr/local/directadmin/custombuild/php_extensions.conf;
 
 REDHAT_RELEASE=/etc/redhat-release
 DEBIAN_VERSION=/etc/debian_version
@@ -1568,7 +1568,6 @@ if [ "${OS}" != "FreeBSD" ] && [ "${AUTO}" = "0" ]; then
 
         ${BUILD} secure_php
 fi
-#CSF if AUTO
 if [ "${OS}" != "FreeBSD" ] && [ "${AUTO}" = "1" ]; then
 	CSF_LOG=/var/log/directadmin/csf_install.log
 	CSF_SH=/root/csf_install.sh
