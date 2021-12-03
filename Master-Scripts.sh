@@ -85,24 +85,24 @@ function install_da_default {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/install-directadmin-default.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/install-directadmin-default.sh) auto
 }
 function change_port_da() {
-    cd /usr/local/directadmin/conf/;
-    vi directadmin.conf;
-    killall -9 directadmin;
-    service directadmin restart;
+    cd /usr/local/directadmin/conf/
+    vi directadmin.conf
+    killall -9 directadmin
+    service directadmin restart
 }
 function change_port_csf() {
-    vi /etc/ssh/sshd_config;
-    service sshd restart;
-    vi /etc/csf/csf.conf;
-    csf -r;
+    vi /etc/ssh/sshd_config
+    service sshd restart
+    vi /etc/csf/csf.conf
+    csf -r
 }
 function reboot_vps() {
     reboot
 }
 
 function restart_da() {
-    killall -9 directadmin;
-    service directadmin restart;
+    killall -9 directadmin
+    service directadmin restart
 }
 
 function get_myAdmin_pass() {
@@ -122,63 +122,63 @@ function change_pass_vps() {
 }
 
 function rename_auto_system() {
-    wget -P /root/ https://raw.githubusercontent.com/minhvinhdao/DA/main/doiten.sh && chmod a+x /root/doiten.sh;
-    pause '                       [Enter] ...';
-    cd /root;
-    ./doiten.sh;
+    wget -P /root/ https://raw.githubusercontent.com/minhvinhdao/DA/main/doiten.sh && chmod a+x /root/doiten.sh
+    pause '                       [Enter] ...'
+    cd /root
+    ./doiten.sh
 }
 function active_da() {
-    rm -rf /etc/sysconfig/network-scripts/ifcfg-eth0:100;
-    ifconfig eth0:100 176.99.3.34 netmask 255.255.255.0 up;
-    echo 'DEVICE=eth0:100' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100;
-    echo 'IPADDR=176.99.3.34' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100;
-    echo 'NETMASK=255.255.255.0' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100;
-    echo 'ONBOOT=yes' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100;
-    echo 'BOOTPROTO=none' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100;
-    /usr/bin/perl -pi -e 's/^ethernet_dev=.*/ethernet_dev=eth0:100/' /usr/local/directadmin/conf/directadmin.conf;
-    service network restart;
-    service directadmin stop;
-    rm -rf /etc/cron.d/directadmin_cron;
-    /usr/bin/wget -O /etc/cron.d/directadmin_cron https://raw.githubusercontent.com/minhvinhdao/DA/main/directadmin_cron;
-    chmod 600 /etc/cron.d/directadmin_cron;
-    rm -rf /usr/local/directadmin/conf/license.key;
-    /usr/bin/wget -O /usr/local/directadmin/conf/license.key https://github.com/minhvinhdao/DA/raw/main/license.key;
-    chmod 600 /usr/local/directadmin/conf/license.key;
-    chown diradmin:diradmin /usr/local/directadmin/conf/license.key;
-    service directadmin start;
-    systemctl disable firewalld;
-    systemctl stop firewalld;
+    rm -rf /etc/sysconfig/network-scripts/ifcfg-eth0:100
+    ifconfig eth0:100 176.99.3.34 netmask 255.255.255.0 up
+    echo 'DEVICE=eth0:100' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
+    echo 'IPADDR=176.99.3.34' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
+    echo 'NETMASK=255.255.255.0' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
+    echo 'ONBOOT=yes' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
+    echo 'BOOTPROTO=none' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
+    /usr/bin/perl -pi -e 's/^ethernet_dev=.*/ethernet_dev=eth0:100/' /usr/local/directadmin/conf/directadmin.conf
+    service network restart
+    service directadmin stop
+    rm -rf /etc/cron.d/directadmin_cron
+    /usr/bin/wget -O /etc/cron.d/directadmin_cron https://raw.githubusercontent.com/minhvinhdao/DA/main/directadmin_cron
+    chmod 600 /etc/cron.d/directadmin_cron
+    rm -rf /usr/local/directadmin/conf/license.key
+    /usr/bin/wget -O /usr/local/directadmin/conf/license.key https://github.com/minhvinhdao/DA/raw/main/license.key
+    chmod 600 /usr/local/directadmin/conf/license.key
+    chown diradmin:diradmin /usr/local/directadmin/conf/license.key
+    service directadmin start
+    systemctl disable firewalld
+    systemctl stop firewalld
 }
 function active_da_version() {
-    rm -rf /etc/sysconfig/network-scripts/ifcfg-eth0:100;
-    ifconfig eth0:100 176.99.3.34 netmask 255.255.255.0 up;
-    echo 'DEVICE=eth0:100' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100;
-    echo 'IPADDR=176.99.3.34' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100;
-    echo 'NETMASK=255.255.255.0' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100;
-    echo 'ONBOOT=yes' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100;
-    echo 'BOOTPROTO=none' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100;
-    /usr/bin/perl -pi -e 's/^ethernet_dev=.*/ethernet_dev=eth0:100/' /usr/local/directadmin/conf/directadmin.conf;
-    service network restart;
-    service directadmin stop;
-    rm -rf /etc/cron.d/directadmin_cron;
-    /usr/bin/wget -O /etc/cron.d/directadmin_cron https://raw.githubusercontent.com/minhvinhdao/DA/main/directadmin_cron;
-    chmod 600 /etc/cron.d/directadmin_cron;
-    rm -rf /usr/local/directadmin/conf/license.key;
-    /usr/bin/wget -O /usr/local/directadmin/conf/license.key https://github.com/minhvinhdao/DA/raw/main/license.key;
-    chmod 600 /usr/local/directadmin/conf/license.key;
-    chown diradmin:diradmin /usr/local/directadmin/conf/license.key;
-    service directadmin start;
-    systemctl disable firewalld;
-    systemctl stop firewalld;
-    cd /usr/local/directadmin;
-    wget --no-check-certificate -O update.tar.gz 'https://github.com/minhvinhdao/DA/raw/main/update.tar.gz';
-    tar xvzf update.tar.gz;
-    ./directadmin p;
-    cd /usr/local/directadmin/scripts;
-    ./update.sh;
-    service directadmin restart;
-    cd /usr/local/directadmin;
-    rm -f update.tar.gz;
+    rm -rf /etc/sysconfig/network-scripts/ifcfg-eth0:100
+    ifconfig eth0:100 176.99.3.34 netmask 255.255.255.0 up
+    echo 'DEVICE=eth0:100' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
+    echo 'IPADDR=176.99.3.34' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
+    echo 'NETMASK=255.255.255.0' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
+    echo 'ONBOOT=yes' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
+    echo 'BOOTPROTO=none' >>/etc/sysconfig/network-scripts/ifcfg-eth0:100
+    /usr/bin/perl -pi -e 's/^ethernet_dev=.*/ethernet_dev=eth0:100/' /usr/local/directadmin/conf/directadmin.conf
+    service network restart
+    service directadmin stop
+    rm -rf /etc/cron.d/directadmin_cron
+    /usr/bin/wget -O /etc/cron.d/directadmin_cron https://raw.githubusercontent.com/minhvinhdao/DA/main/directadmin_cron
+    chmod 600 /etc/cron.d/directadmin_cron
+    rm -rf /usr/local/directadmin/conf/license.key
+    /usr/bin/wget -O /usr/local/directadmin/conf/license.key https://github.com/minhvinhdao/DA/raw/main/license.key
+    chmod 600 /usr/local/directadmin/conf/license.key
+    chown diradmin:diradmin /usr/local/directadmin/conf/license.key
+    service directadmin start
+    systemctl disable firewalld
+    systemctl stop firewalld
+    cd /usr/local/directadmin
+    wget --no-check-certificate -O update.tar.gz 'https://github.com/minhvinhdao/DA/raw/main/update.tar.gz'
+    tar xvzf update.tar.gz
+    ./directadmin p
+    cd /usr/local/directadmin/scripts
+    ./update.sh
+    service directadmin restart
+    cd /usr/local/directadmin
+    rm -f update.tar.gz
 }
 function install_da_only() {
     bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/install-direct-admin-only.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/install-direct-admin-only.sh)
@@ -193,8 +193,8 @@ function change_pass_centos() {
     passwd
 }
 function change_hostname() {
-    vi /etc/hostname;
-    vi /etc/hosts;
+    vi /etc/hostname
+    vi /etc/hosts
 }
 function speed_test() {
     curl -Lso- tocdo.net | bash
@@ -204,6 +204,12 @@ function speed_test_share() {
 }
 function pause() {
     read -p "$*"
+}
+function install_single_da() {
+    bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/config-single-da.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/config-single-da.sh) auto
+}
+function config_single_da() {
+    bash <(curl -Ss https://raw.githubusercontent.com/minhvinhdao/DA/main/install-single-da.sh || wget -O - https://raw.githubusercontent.com/minhvinhdao/DA/main/install-single-da.sh) auto
 }
 ##
 # Color  Variables
@@ -234,6 +240,7 @@ menu() {
 
     +++ INSTALL +++
   $(ColorGreen '03)') Cài đặt DirectAdmin Default
+  $(ColorGreen '45)') Cài đặt DirectAdmin Single
   $(ColorGreen '04)') Cài đặt DirectAdmin Nginx - Apache
   $(ColorGreen '05)') Cài đặt DirectAdmin OpenLiteSpeed
   $(ColorGreen '06)') Cài đặt DirectAdmin Auto System
@@ -251,6 +258,7 @@ menu() {
 
     +++ CONFIG +++
   $(ColorGreen '16)') Config Auto System
+  $(ColorGreen '46)') Config Single DirectAdmin
   $(ColorGreen '17)') Config DirectAdmin
   $(ColorGreen '18)') Config PhpMyAdmin
   $(ColorGreen '19)') Config OPcache
@@ -506,6 +514,16 @@ $(ColorBlue 'Chọn tuỳ chọn của bạn (Nhập số và nhấn Enter):')
         ;;
     43)
         clean_auto_system
+        pause ' Nhấn [Enter] để tiếp tục...'
+        menu
+        ;;
+    45)
+        install_single_da
+        pause ' Nhấn [Enter] để tiếp tục...'
+        menu
+        ;;
+    46)
+        config_single_da
         pause ' Nhấn [Enter] để tiếp tục...'
         menu
         ;;
