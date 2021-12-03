@@ -1542,32 +1542,6 @@ if [ -e /etc/aliases ]; then
 	fi
 fi
 
-#CSF if AUTO
-if [ "${OS}" != "FreeBSD" ] && [ "${AUTO}" = "0" ]; then
-	CSF_LOG=/var/log/directadmin/csf_install.log
-	CSF_SH=/root/csf_install.sh
-	wget -O ${CSF_SH} ${SERVER}/all/csf/csf_install.sh > ${CSF_LOG} 2>&1
-	if [ ! -s ${CSF_SH} ]; then
-		echo "Error downloading ${SERVER}/all/csf/csf_install.sh"
-		cat ${CSF_LOG}
-	else
-		#run it
-		chmod 755 ${CSF_SH}
-		${CSF_SH} auto >> ${CSF_LOG} 2>&1
-		USE_IPSET=true
-		if [ -x /usr/bin/systemd-detect-virt ]; then
-			if systemd-detect-virt | grep -m1 -q -E 'lxc|openvz'; then
-			    USE_IPSET=false
-			fi
-		fi
-		if ${USE_IPSET} && grep -m1 -q '^LF_IPSET = "0"' /etc/csf/csf.conf; then
-			perl -pi -e 's|^LF_IPSET = "0"|LF_IPSET = "1"|g' /etc/csf/csf.conf
-			csf -r >> /dev/null 2>&1
-		fi
-	fi
-
-        ${BUILD} secure_php
-fi
 if [ "${OS}" != "FreeBSD" ] && [ "${AUTO}" = "1" ]; then
 	CSF_LOG=/var/log/directadmin/csf_install.log
 	CSF_SH=/root/csf_install.sh
