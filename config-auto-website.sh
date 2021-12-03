@@ -5,6 +5,7 @@ function pause(){
 # OPcache
 cd /usr/local/directadmin/custombuild;
 mkdir -p custom/opcache/;
+rm -f /usr/local/directadmin/custombuild/custom/opcache/opcache.ini;
 wget -P /usr/local/directadmin/custombuild/custom/opcache/ https://raw.githubusercontent.com/minhvinhdao/DA/main/opcache.ini && chmod 644 /usr/local/directadmin/custombuild/custom/opcache/opcache.ini;
 cd /usr/local/directadmin/custombuild;
 ./build opcache;
@@ -74,7 +75,7 @@ service directadmin restart;
 # Change Port SSH
 vi /etc/ssh/sshd_config;
 service sshd restart;
-vi /etc/csf/csf.conf;
+nano /etc/csf/csf.conf;
 csf -r;
 pause '                        Nhấn [Enter] để tiếp tục...';
 reboot;
