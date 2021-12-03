@@ -126,7 +126,7 @@ OS_OVERRIDE_FILE=/root/.os_override
 
 GET_LICENSE=1
 if [ -s /root/.skip_get_license ]; then
-	GET_LICENSE=0
+	GET_LICENSE=1
 fi
 
 if [ $# -gt 0 ]; then
@@ -155,139 +155,6 @@ case "$1" in
 		;;
 esac
 
-	if [ "$1" = "auto" ]; then
-		AUTO=1
-		CMD_LINE=1
-		LID_INFO=/root/.lid_info
-
-		#cleanup
-		rm -f /root/.lan
-		rm -f ${LID_INFO}
-
-		${WGET_PATH} ${WGET_OPTION} -O ${LID_INFO} https://www.directadmin.com/clients/my_license_info.php
-		if [ ! -s ${LID_INFO} ]; then
-			echo "Error getting license info. Empty ${LID_INFO} file. Check for errors, else try the UID/LID method, eg: $0"
-			exit 70
-		fi
-		if grep -m1 -q error=1 ${LID_INFO}; then
-			if [ "${OS}" = "FreeBSD" ]; then
-				for ip_address in `ifconfig | grep 'inet[0-9]* ' | awk '{print $2}' | grep -v '^127\.0\.0\.1' | grep -v '^::1' | grep -v '^fe80'`; do {
-					${WGET_PATH} ${WGET_OPTION} --bind-address="${ip_address}" -O ${LID_INFO} https://www.directadmin.com/clients/my_license_info.php
-					if ! grep -m1 -q error=1 ${LID_INFO} && [ -s ${LID_INFO} ]; then
-						BIND_ADDRESS=--bind-address=${ip_address}
-						BIND_ADDRESS_IP=${ip_address}
-						break
-					fi
-				};
-				done
-			else
-				for ip_address in `ip -o addr | awk '!/^[0-9]*: ?lo|link\/ether/ {print $4}' | cut -d/ -f1 | grep -v ^fe80`; do {
-					${WGET_PATH} ${WGET_OPTION} --bind-address="${ip_address}" -O ${LID_INFO} https://www.directadmin.com/clients/my_license_info.php
-					if ! grep -m1 -q error=1 ${LID_INFO} && [ -s ${LID_INFO} ]; then
-						BIND_ADDRESS=--bind-address=${ip_address}
-						BIND_ADDRESS_IP=${ip_address}
-						break
-					fi
-				};
-				done
-			fi
-		fi
-		if grep -m1 -q error=1 ${LID_INFO}; then
-			echo "An error has occured. Info about the error:"
-			grep ^text= ${LID_INFO} | cut -d= -f2
-
-			if [ "${GET_LICENSE}" = "1" ]; then
-				exit 71
-			fi
-			echo "However, we're skipping the license download, so we'll continue anyway"
-		fi
-		CID=`grep ^uid= ${LID_INFO} |cut -d= -f2`
-		LID=`grep ^lid= ${LID_INFO} |cut -d= -f2`
-		IP=`grep ^ip=   ${LID_INFO} |cut -d= -f2`
-		HOST=`grep ^hostname= ${LID_INFO} |cut -d= -f2`
-		LID_OS=`grep ^os= ${LID_INFO} |cut -d= -f2`
-
-		USE_HOST=/root/.use_hostname
-		if [ -e ${USE_HOST} ]; then
-			HOST=`cat ${USE_HOST} | head -n 1`
-		fi
-
-		if [ "${HOST}" = "" ]; then
-			if [ -x /usr/bin/hostnamectl ]; then
-				HOST=`/usr/bin/hostnamectl --static | head -n1`
-				if ! echo "${HOST}" | grep  -m1 -q '\.'; then
-					HOST=`grep -m1 -o "${HOST}\.[^ ]*" /etc/hosts`
-				fi
-			else
-				HOST=`hostname -f`
-			fi
-		fi
-		if [ "${HOST}" = "localhost" ]; then
-			echo "'localhost' is not valid for the hostname. Setting it to server.hostname.com, you can change it later in Admin Settings"
-			HOST=server.hostname.com
-		fi
-		if [ "${HOST}" != "" ]; then
-			C=`echo ${HOST} | grep -o '\.' | grep -c '\.'`
-			if [ "${C}" = "0" ]; then
-				echo "'${HOST}' is not valid for the hostname. Setting it to server.hostname.com, you can change it later in Admin Settings"
-				HOST=server.hostname.com			
-			fi
-		fi
-
-		if [ "$OS" = "FreeBSD" ]; then
-			EDEVS=`ifconfig -l`
-			for i in $EDEVS; do
-			{
-				DC=`ifconfig $i | grep -c "inet $IP "`
-				if [ "${DC}" -gt 0 ]; then
-					ETH_DEV=$i
-					break
-				fi
-			};
-			done;
-		else
-			ETH_DEV=`ip addr | grep " $IP/" | awk '{print $NF}'`
-		fi
-		if [ -z "${ETH_DEV}" ]; then
-			if [ "${OS}" != "FreeBSD" ]; then
-				ETH_DEV_TEMP=`ip link | grep -v 'lo:' | grep -m1 '^[0-9]:' | cut -d: -f2 | awk '{print $1}'`
-				if [ ! -z "${ETH_DEV_TEMP}" ]; then
-					ETH_DEV="${ETH_DEV_TEMP}"
-					LAN_AUTO=1
-					echo 1 > /root/.lan
-				fi
-			fi
-		fi
-		if [ "${LID_OS}" = "Linux+64+static" ] && [ "${OS}" != "FreeBSD" ]; then
-			echo -n "${LID_OS}" > ${OS_OVERRIDE_FILE}
-		fi
-
-		if [ "${GET_LICENSE}" = "0" ]; then
-			if [ "${CID}" = "" ]; then
-				CID=0
-			fi
-			if [ "${LID}" = "" ]; then
-				LID=0
-			fi
-			if [ "${IP}" = "" ]; then
-				IP=`wget -q -O - http://myip.directadmin.com`
-			fi
-		fi
-	else
-		CID=$1;
-		LID=$2;
-		HOST=$3;
-		if [ $# -lt 4 ]; then
-			$0 --help
-			exit 56;
-		fi
-
-		ETH_DEV=$4;
-		CMD_LINE=1;
-		if [ $# -gt 4 ]; then
-			IP=$5;
-		fi
-	fi
 fi
 
 if uname -m | grep -m1 -q 64; then
