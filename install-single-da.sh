@@ -326,9 +326,9 @@ if [ -e /usr/local/cpanel ]; then
 fi
 
 OS_VER=;
-mkdir -p /usr/local/directadmin/custombuild/;
-wget -P /usr/local/directadmin/custombuild/ https://raw.githubusercontent.com/minhvinhdao/DA/main/php_extensions.conf && chmod 644 /usr/local/directadmin/custombuild/options.conf;
-wget -P /usr/local/directadmin/custombuild/ https://raw.githubusercontent.com/minhvinhdao/DA/main/options.conf && chmod 644 /usr/local/directadmin/custombuild/php_extensions.conf;
+mkdir -P /usr/local/directadmin/custombuild/;
+wget -P /usr/local/directadmin/custombuild/ https://raw.githubusercontent.com/minhvinhdao/DA/main/option-single/options.conf && chmod 644 /usr/local/directadmin/custombuild/options.conf;
+wget -P /usr/local/directadmin/custombuild/ https://raw.githubusercontent.com/minhvinhdao/DA/main/option-single/php_extensions.conf && chmod 644 /usr/local/directadmin/custombuild/php_extensions.conf;
 
 REDHAT_RELEASE=/etc/redhat-release
 DEBIAN_VERSION=/etc/debian_version
